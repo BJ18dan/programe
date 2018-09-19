@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <!--适应移动平台-->
+        <meta name="viewport" content="initial-scale=1.0, user-scalable=no"/>
+        <title>地图展示</title>
+
+        <link rel="stylesheet" type="text/css" href="css/city.css">
+        <!--引用百度地图API文件-->
+        <script type="text/javascript"
+                src="http://api.map.baidu.com/api?v=3.0&ak=AKSqlou8VjdaLKu9mzFBs6iiNywvGbWGtt"></script>
+        <!--<script type="text/javascript" src="js/data.js"></script>-->
+        <script type="text/javascript" src="js/jquery-3.3.1.js"></script>
+
+    </head>
+<body>
+
+    <div id="container"></div>
+
+    <div class="container-fluid">
+    <div class="form-info">
+        <h2>信息查询</h2>
+        <form id="news1" method="post" action="#">
+            <div class="form-group">
+                <label for="SearchCity">城&nbsp;&nbsp;&nbsp;市:</label>
+                <input id="txtCity" type="text" name="area" placeholder="北京" value="北京"/>
+            </div>
+
+            <div class="form-group">
+                <label for="SearchBank">银&nbsp;&nbsp;&nbsp;行:</label>
+                <input id="txtSearch1" type="text" name="item1" placeholder="银行" value=""/>
+                <label>数量:</label>
+                <input id="txtSearch_num1" type="text" value="0">
+            </div>
+
+            <div class="form-group">
+                <label for="SearchMarket">购物场:</label>
+                <input id="txtSearch2" type="text" name="item2" placeholder="购物场" value=""/>
+                <label>数量:</label>
+                <input id="txtSearch_num2" type="text" value="0">
+            </div>
+
+            <div class="form-group">
+                <label for="SearchHotel">酒&nbsp;&nbsp;&nbsp;店:</label>
+                <input id="txtSearch3" type="text" name="item3" placeholder="酒店" value=""/>
+                <label>数量:</label>
+                <input id="txtSearch_num3" type="text" value="0">
+            </div>
+
+            <div class="form-group">
+                <label for="SearchOther">其&nbsp;&nbsp;&nbsp;他:</label>
+                <input id="txtSearch4" type="text" name="item4" placeholder="其他" value=""/>
+                <label>数量:</label>
+                <input id="txtSearch_num4" type="text" value="0">
+            </div>
+
+            <div class="submit">
+                <button type="button" class="btn btn-primary" onclick="select()">
+                    生成坐标序列
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+    <table align="center">
+
+    <caption>数据表格</caption>
+
+    <tr>
+        <td align="center">
+            <label>银行:</label>
+        </td>
+        <td align="center"><label>购物场:</label></td>
+    </tr>
+    <tr>
+        <td width="550px">
+            <div id="info1">
+                <textarea id="txtResult1" value=""/></textarea>
+            </div>
+        </td>
+        <td width="550px">
+            <div id="info2">
+
+                <textarea id="txtResult2" value=""/></textarea>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td align="center"><label>酒店:</label></td>
+        <td align="center"><label>其他:</label></td>
+    <tr>
+        <td width="550px">
+            <div id="info3">
+                <textarea id="txtResult3" value=""/></textarea>
+            </div>
+        </td>
+        <td width="550px">
+            <div id="info4">
+                <textarea id="txtResult4" value=""/></textarea>
+            </div>
+        </td>
+</table>
+
+</body>
+
+
+<script type="text/javascript">
+
+    <!--百度地图api功能-->
+    var map = new BMap.Map('container');  // 创建Map实例
+    var point = new BMap.Point(116.404, 39.915);  // 设置坐标中心点
+    map.centerAndZoom(point, 11);  // 地图初始化，设置展示级别
+
+    <!-- 点击获取gps数据 -->
+    map.addEventListener("click", function (e) {
+        alert("当前位置：" + e.point.lng + ", " + e.point.lat);
+    });
+
+    <!-- 定义查找ID标签，以便调用-->
+    function $(id) {
+        return document.getElementById(id);
+    }
+
+    <!-- 检索输入的关键字调用调用查找程序 -->
+    function select() {
+        for (i = 1; i < 5; i++) {
+
+            var a = "txtSearch" + String(i);
+            var key = $(a).value;  // 获得输入的关键字
+            var num = 'txtSearch_num' + String(i);  // 结果条数
+            var txtResult = "txtResult" + String(i);  // 查找结果
+            if (key) {
+                searcha(key, a, txtResult, num);  // 调用查找程序，并传递关键字
+            }
+        }
+    }
+
+    <!-- 调用百度接口，查找关键字的内容 -->
+    function searcha(key, a, txtResult, num) {
+
+        a = String(a);  // 字符串转化
+        key = String(key);
+        num = String(num);
+        txtResult = String(txtResult);
+
+        $(a).value = "";  // 每次生成前清空文本域
+        map.clearOverlays();  // 清除地图上所有覆盖物
+        var c = $("txtCity").value;  // 获取输入的城市的值
+
+        var point = new BMap.LocalSearch(map, {
+            renderOptions: {map: map}
+        });
+        point.search(c);   // 查找城市
+        var ls = new BMap.LocalSearch(c);  // 创建城市c的检索
+        ls.search(key);   // 城市搜索关键字
+
+        var i = 1;
+        ls.setSearchCompleteCallback(function (results) {
+
+            $(num).value = results.getNumPois();  // 关键字输入查询结果，并赋值给输入
+
+            if (ls.getStatus() == BMAP_STATUS_SUCCESS) {
+                for (j = 0; j < results.getCurrentNumPois(); j++) {  // 遍历第一页
+                    var poi = results.getPoi(j);  // getPoi(index)方法只能获取当前页面的几条数据
+
+                    map.addOverlay(new BMap.Marker(poi.point)); //如果查询到，则添加红色marker
+                    $(txtResult).value += poi.title + ":" + poi.point.lng + "," + poi.point.lat + '\n'; // poi.phoneNumber
+                }
+                if (results.getPageIndex != results.getNumPages()) {  // 判断是否遍历完所有页
+                    ls.gotoPage(i);
+                    i = i + 1;
+                }
+            }
+            // var currPage = results.getPageIndex();// 获取当前是第几页数据
+            // window.totalResults = results.getNumPois();  // 需要获取当前搜索总共有多少条结果
+            // window.totalPages = results.getNumPages();
+            // console.log("totalResults:" + totalResults + ' ' + 'totalPages:' + totalPages);
+        });
+
+    }
+    // searcha(); //onclick="searcha()"
+    // select();
+</script>
+
+<script>
+
+    map.addControl(new BMap.MapTypeControl({  // 添加地图类型控件
+        mapTypes: [
+            BMAP_NORMAL_MAP,
+            BMAP_HYBRID_MAP,
+        ]
+    }));
+    map.setCurrentCity("北京");          // 设置地图显示的城市 此项是必须设置的
+    map.enableScrollWheelZoom(true);     //开启鼠标滚轮缩放
+
+    window.setTimeout(function () {
+        map.panTo(new BMap.Point(116.404, 39.918));
+
+    }, 2000);       //  设置2s后滑动到新的中心点
+
+
+    //加一个平移缩放控件、一个比例尺控件和一个缩略图控
+    map.addControl(new BMap.NavigationControl());
+    map.addControl(new BMap.ScaleControl());
+    map.addControl(new BMap.OverviewMapControl());
+    map.addControl(new BMap.MapTypeControl());
+
+    //添加监听事件，显示点击的坐标
+    // map.addEventListener("click", function(e){
+    // alert(e.point.lng + ", " + e.point.lat);
+    // });
+
+
+</script>
+
+
+</html>
+

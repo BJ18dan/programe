@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <!--适应移动平台-->
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no"/>
+    <title>地图展示</title>
+
+    <style type="text/css">
+        <!--
+        设置容器大小，使充满浏览器窗口-- >
+            /*搜索结果容器*/
+        body, html {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            font-family: "微软雅黑";
+        }
+
+        #container {
+            height: 500px
+        }
+
+        #search-result {
+            width: 100%
+        }
+
+        #l-result {
+            width: 300px;
+            float: left
+        }
+
+        #r-result {
+            width: 300px;
+            height: 300px;
+            font-size: 14px;
+            line-height: 20px;
+            float: right
+        }
+
+        #news1 {
+            width: 400px;
+            height: 300px
+        }
+
+        #txtResult {
+            width: 400px;
+            height: 500px
+        }
+
+    </style>
+
+    <!--引用百度地图API文件-->
+    <script type="text/javascript"
+            src="http://api.map.baidu.com/api?v=3.0&ak=AKSqlou8VjdaLKu9mzFBs6iiNywvGbWGtt"></script>
+    <script type="text/javascript" src="js/data.js"></script>
+    <script type="text/javascript" src="js/jquery-3.3.1.js"></script>
+
+</head>
+<body>
+
+<div id="container"></div>
+
+<div class="layout">
+    <form id="news1" method="post">
+
+        <P> 搜索城市 <input id="txtCity" type="text" value="北京市" name="area"/></p>
+        <p> 地名关键词<input id="txtSearch" type="text" value="肯德基" name="item"/></p>
+        <p><input type="button" value="生成坐标序列" onclick="searcha()"/></p>
+
+        <p> 显示结果 <textarea id="txtResult" value=""/></textarea></p>
+    </form>
+</div>
+
+<div id="l-result"></div>
+<div id="r-result"></div>
+
+</body>
+
+<script type="text/javascript">
+    <!--百度地图api功能-->
+    var map = new BMap.Map('container');  // 创建Map实例
+    var point = new BMap.Point(116.404, 39.915);  // 设置坐标中心点
+    map.centerAndZoom(point, 11);  // 地图初始化，设置展示级别
+
+
+    map.addEventListener("click", function (e) {
+        alert("当前位置：" + e.point.lng + ", " + e.point.lat);
+    });
+
+
+    function $(id) {
+        return document.getElementById(id);//定义$,以便调用
+    }
+
+    function searcha() {
+        $("txtResult").value = "";  // 每次生成前清空文本域
+        map.clearOverlays();    //清除地图上所有覆盖物
+        var c = $("txtCity").value;
+
+        var point = new BMap.LocalSearch(map, {
+            renderOptions: {map: map}
+        });
+
+        point.search(c);   // 查找城市
+
+        var s = $("txtSearch").value;  // 获得输入的关键字
+
+        var ls = new BMap.LocalSearch(c);  // 创建城市c的检索
+        ls.search(s);   // 城市搜索关键字
+
+        var i = 1;
+        ls.setSearchCompleteCallback(function (results) {
+
+            if (ls.getStatus() == BMAP_STATUS_SUCCESS) {
+                var totalResults = results.getNumPois();
+                var totalPages = results.getNumPages();
+                console.log("totalResults:" + totalResults + ' ' + 'totalPages:' + totalPages);
+            }
+        });
+    }
+
+</script>
+
+<script>
+    // 添加地图类型控件
+    map.addControl(new BMap.MapTypeControl({
+        mapTypes: [
+            BMAP_NORMAL_MAP,
+            BMAP_HYBRID_MAP
+        ]
+    }));
+    map.setCurrentCity("北京");          // 设置地图显示的城市 此项是必须设置的
+    map.enableScrollWheelZoom(true);     //开启鼠标滚轮缩放
+
+    window.setTimeout(function () {
+        map.panTo(new BMap.Point(116.404, 39.918));
+
+    }, 2000);       //  设置2s后滑动到新的中心点
+
+
+    //加一个平移缩放控件、一个比例尺控件和一个缩略图控
+    map.addControl(new BMap.NavigationControl());
+    map.addControl(new BMap.ScaleControl());
+    map.addControl(new BMap.OverviewMapControl());
+    map.addControl(new BMap.MapTypeControl());
+
+    //添加监听事件，显示点击的坐标
+    // map.addEventListener("click", function(e){
+    // alert(e.point.lng + ", " + e.point.lat);
+    // });
+
+
+</script>
+
+
+</html>
+

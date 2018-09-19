@@ -1,0 +1,63 @@
+<!--
+设置容器大小，使充满浏览器窗口-- >
+    /*搜索结果容器*/
+body, html {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    font-family: "微软雅黑";
+}
+
+#container {
+    height: 500px
+}
+
+#search-result {
+    width: 100%
+}
+
+#l-result {
+    width: 300px;
+    float: left
+}
+
+#r-result {
+    width: 300px;
+    height: 300px;
+    font-size: 14px;
+    line-height: 20px;
+    float: right
+}
+
+#news1 {
+    width: 100%;
+    height: 150px;
+    float: left;
+}
+
+
+
+#information2 {
+    width: 800px;
+}
+#txtResult1 {
+    width: 99%;
+    height: 300px;
+
+}
+
+#txtResult2 {
+    width: 99%;
+    height: 300px;
+
+}
+
+#txtResult3 {
+    width: 99%;
+    height: 300px;
+}
+
+#txtResult4 {
+    width: 99%;
+    height: 300px;
+}
